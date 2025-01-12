@@ -71,6 +71,18 @@ for idx, file_path in enumerate(file_paths):
         color=colors[idx % len(colors)]
     )
 
+    xy0 = (10, 122.5)
+    xy1 = (11.5, 30.5)
+    ax1.annotate('Sensor2', xy0, xy1, arrowprops=dict(arrowstyle='<-', color='k', shrinkA=0, shrinkB=0))
+
+    xy0 = (17, 141.5)
+    xy1 = (21.5, 30.5)
+    ax1.annotate('Sensor3', xy0, xy1, arrowprops=dict(arrowstyle='<-', color='k', shrinkA=0, shrinkB=0))
+
+    xy0 = (25, 160.5)
+    xy1 = (31.5, 30.5)
+    ax1.annotate('Sensor4', xy0, xy1, arrowprops=dict(arrowstyle='<-', color='k', shrinkA=0, shrinkB=0))
+
 # Configurações dos eixos
 ax1.set_xticks([])
 ax1.set_ylabel('Bytes', fontsize=16)
