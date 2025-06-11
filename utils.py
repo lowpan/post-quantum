@@ -1,95 +1,68 @@
-#!/usr/bin/env python
-
-import sys
 import subprocess
-from time import sleep
+import argparse 
 
-from mininet.log import setLogLevel, info
-from mininet.term import makeTerm
-from mn_wifi.sixLoWPAN.link import LoWPAN
-from mn_wifi.energy import BitZigBeeEnergy
-from containernet.net import Containernet
-from containernet.node import DockerSensor
+def set_parser():
+    parser = argparse.ArgumentParser(
+        description="Containernet 6LoWPAN RPLD Topology Script with Crypto Scenarios.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
+    parser.add_argument(
+        '-s', '--scenario',
+        choices=['no_cryptography', 'rsa', 'kyber'],
+        default='no_cryptography',
+        help="Cryptography scenario to run.",
+        dest='scenario_name'
+    )
+    parser.add_argument(
+        '-i', '--iteration',
+        type=int,
+        default=1,
+        help="Iteration number for the run.",
+        dest='iteration_num'
+    )
+    parser.add_argument(
+        '-b', '--batch',
+        action='store_true',
+        help="Run in batch mode (no CLI, captures data to files)."
+    )
+    parser.add_argument(
+        '-t', '--topology_id',
+        type=int,
+        default=1,
+        choices=range(1, 13),
+        help="Identifier for the network topology to build. It must be a number between 1 and 12.",
+    )
+    return parser
 
-
-def topology():
-    "Create a network."
-    net = Containernet(iot_module='mac802154_hwsim')
-    dimage = 'ramonfontes/lowpan-post-quantum'
-    pcap_file = "sem_criptografia"
-
-    args1, args2 = {}, {}
-    if 'rsa' in sys.argv:
-        pcap_file = sys.argv[1]
+def get_crypto_args(scenario_name):
+    """Return the appropriate arguments based on the scenario name."""
+    if scenario_name == 'rsa':
         (s1_rsa_sk, s1_rsa_pk, s2_rsa_sk, s2_rsa_pk,
          s3_rsa_sk, s3_rsa_pk, s4_rsa_sk, s4_rsa_pk)  = get_rsa_keys()
         args1 = {'secret_key': s1_rsa_sk, 'public_key': s1_rsa_pk, 'enc_mode': 1}
         args2 = {'secret_key': s2_rsa_sk, 'public_key': s2_rsa_pk, 'enc_mode': 1}
-    elif 'kyber' in sys.argv:
-        pcap_file = sys.argv[1]
+    elif scenario_name == 'kyber':
         (s1_kyber_sk, s1_kyber_pk, s2_kyber_sk, s2_kyber_pk,
          s3_kyber_sk, s3_kyber_pk, s4_kyber_sk, s4_kyber_pk) = get_kyber_keys()
         args1 = {'secret_key': s1_kyber_sk, 'public_key': s1_kyber_pk, 'enc_mode': 2}
         args2 = {'secret_key': s2_kyber_sk, 'public_key': s2_kyber_pk, 'enc_mode': 2}
+    elif scenario_name == 'no_cryptography':
+        args1, args2 = {}, {}
+    else:
+        raise ValueError(f"Unknown scenario: {scenario_name}")
+    
+    return args1, args2
 
-    info("*** Creating nodes\n")
-    sensor1 = net.addSensor('sensor1', ip6='fe80::1/64', panid='0xbeef',
-                            dodag_root=True, storing_mode=2,  voltage=3.7,
-                            cls=DockerSensor, dimage=dimage, cpu_shares=10,
-                            volumes=["/tmp/.X11-unix:/tmp/.X11-unix:rw"],
-                            environment={"DISPLAY": ":0"}, privileged=True,
-                            **args1)
-    sensor2 = net.addSensor('sensor2', ip6='fe80::2/64', panid='0xbeef',
-                            storing_mode=2, voltage=3.7,
-                            cls=DockerSensor, dimage=dimage, cpu_shares=10,
-                            volumes=["/tmp/.X11-unix:/tmp/.X11-unix:rw"],
-                            environment={"DISPLAY": ":0"}, privileged=True,
-                            **args2)
-    sensor3 = net.addSensor('sensor3', ip6='fe80::3/64', panid='0xbeef',
-                            storing_mode=2, voltage=3.7,
-                            cls=DockerSensor, dimage=dimage, cpu_shares=10,
-                            volumes=["/tmp/.X11-unix:/tmp/.X11-unix:rw"],
-                            environment={"DISPLAY": ":0"}, privileged=True,
-                            **args2)
-    sensor4 = net.addSensor('sensor4', ip6='fe80::4/64', panid='0xbeef',
-                            storing_mode=2, voltage=3.7,
-                            cls=DockerSensor, dimage=dimage, cpu_shares=10,
-                            volumes=["/tmp/.X11-unix:/tmp/.X11-unix:rw"],
-                            environment={"DISPLAY": ":0"}, privileged=True,
-                            **args2)
-
-    info("*** Configuring nodes\n")
-    net.configureNodes()
-
-    info("*** Adding links\n")
-    net.addLink(sensor1, sensor2, cls=LoWPAN)
-    net.addLink(sensor2, sensor3, cls=LoWPAN)
-    net.addLink(sensor3, sensor4, cls=LoWPAN)
-
-    info("*** Starting network\n")
-    net.build()
-
-    info("*** Configuring energy model\n")
-    BitZigBeeEnergy(net.sensors)
-
-    info("*** Configuring RPLD\n")
-    net.configRPLD(net.sensors)
-
-    for _ in range(0, 1):
-        makeTerm(sensor1, title=sensor1, cmd=f"bash -c 'tcpdump -w {pcap_file}.pcap -v;'")
-
-    for t in range(0, 60):
-            print(f"\r{t}", end="", flush=True)
-            sleep(1)
-
-    for _ in range(0, 1):
-        container = f"mn.{sensor1}"
-        source = f"{container}:/{pcap_file}.pcap"
-        destination = f"./{pcap_file}.pcap"
-        docker_cp(source, destination)
-
-    info("*** Stopping network\n")
-    net.stop()
+def docker_cp(source_path, destination_path):
+    """
+    Copy files from a Docker container to a local path.
+    """
+    try:
+        command = ["docker", "cp", source_path, destination_path]
+        subprocess.run(command, check=True)
+        print(f"File(s) copied: {source_path} -> {destination_path}")
+    except subprocess.CalledProcessError as e:
+        print(f"Error when running docker cp command: {e}")
 
 def get_rsa_keys():
     s1_rsa_pk = "2176045891,131073"
@@ -503,19 +476,3 @@ def get_kyber_keys():
 
     return (s1_kyber_pk, s1_kyber_sk, s2_kyber_pk, s2_kyber_sk,
             s3_kyber_pk, s3_kyber_sk, s4_kyber_pk, s4_kyber_sk)
-
-
-def docker_cp(source_path, destination_path):
-    try:
-        command = ["docker", "cp", f"{source_path}", f"{destination_path}"]
-
-        subprocess.run(command, check=True)
-        print(f"Arquivo(s) copiado(s) com sucesso: {source_path} -> {destination_path}")
-
-    except subprocess.CalledProcessError as e:
-        print(f"Erro ao executar o comando docker cp: {e}")
-
-
-if __name__ == '__main__':
-    setLogLevel('info')
-    topology()

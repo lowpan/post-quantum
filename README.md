@@ -1,193 +1,59 @@
-# Passos de reprodutibilidade
+# Reprodutibility Steps
 
+**Requirements**
 
-**Requisitos**
 * Ubuntu LTS +20.04 (22.04 - preferable)
 * Containernet - https://github.com/ramonfontes/containernet
 * +6.0.0 kernel
 
-## Gerar arquivos PCAP
+## Generate PCAP files automatic
 
-### Sem Criptografia
+It's possible to generate the PCAP files automatically by running the script `run_topologies.sh`:
 
-1. Executar o arquivo `topo.py` conforme abaixo:
+```bash
+sudo ./run_topologies.sh
+```
 
-`sudo python topo.py`
+It will run 10 iterations for each topology and scenario, generating the PCAP files in the `pcap` folder. The script will take a while to finish, as it runs all topologies and scenarios.
 
+## Generate PCAP files manually
+
+To generate the PCAP files manually, the commands may take these arguments:
+
+* `-t` for topology ID (It can be a number between 1 and 12 and is respective to the topologies in the `topologies.py` file)
+
+* `-i` for the iteration number (It can be a number between 1 and 10. 1 by default)
+
+* `-s` for the scenario (It can be `rsa`, `kyber`, or `no_cryptography`. `no_cryptography` by default)
+
+### No Cryptography
+
+Execute the `network.py` file as follows:
+
+`sudo python network.py -t <topo_id> -b`
 
 ### RSA
 
-2. Executar o arquivo `topo.py` conforme abaixo:
+Execute the `network.py` file as follows:
 
-`sudo python topo.py rsa`
+`sudo python network.py -s rsa -t <topo_id> -b`
 
 
 ### Crystals Kyber
 
-3. Executar o arquivo `topo.py` conforme abaixo:
+Execute the `network.py` file as follows:
 
-`sudo python topo.py kyber`
+`sudo python network.py -s kyber -t <topo_id> -b`
 
 
-### Gerando resultados
+## Gerando resultados
 
-4. Executar o arquivo `graph.py` conforme abaixo:
+There are two scripts to generate the results from the PCAP files:
 
-`sudo python graph.py`
+1. `compare_key_exchange.py` - This script compares the key exchange times between the RSA and Kyber up to 10 scenarios, generating a graph in the output folder. Graph example:
 
-A execução do script `graph.py` resultará em um resultado similar ao apresentado abaixo:
+![Compare key exchange](./output/key_exchange_time_comparison.png)
 
-```commandline
-Chave Pública kyber: 1244
-Chave Pública kyber: 1244
-Chave Privada kyber: 1148
-DIS kyber: 91
-DIS kyber: 91
-DIO kyber: 121
-DAO kyber: 127
-DAOACK kyber: 108
-DIO kyber: 121
-DIO kyber: 121
-DAO kyber: 146
-DAOACK kyber: 108
-DIO kyber: 121
-DIO kyber: 121
-DAO kyber: 163
-DAOACK kyber: 108
-DIO kyber: 121
-DIO kyber: 121
-DAO kyber: 163
-DAOACK kyber: 108
-DIO kyber: 121
-DIO kyber: 121
-DAO kyber: 163
-DAOACK kyber: 108
-DIO kyber: 121
-DIO kyber: 121
-DAO kyber: 163
-DAOACK kyber: 108
-DIO kyber: 121
-DIO kyber: 121
-DAO kyber: 163
-DAOACK kyber: 108
-DIO kyber: 121
-DIO kyber: 121
-DAO kyber: 163
-DAOACK kyber: 108
-DIO kyber: 121
-DIO kyber: 121
-DAO kyber: 163
-DAOACK kyber: 108
-DIO kyber: 121
-DIO kyber: 121
-DAO kyber: 163
-DAOACK kyber: 108
-DIO kyber: 121
-DIO kyber: 121
-DAO kyber: 163
-DAOACK kyber: 108
-DIO kyber: 121
-DIO kyber: 121
-Chave Pública rsa: 76
-Chave Pública rsa: 76
-Chave Privada rsa: 188
-DIS rsa: 91
-DIS rsa: 91
-DIO rsa: 121
-DAO rsa: 127
-DAOACK rsa: 108
-DIO rsa: 121
-DIO rsa: 121
-DAO rsa: 146
-DAOACK rsa: 108
-DIO rsa: 121
-DIO rsa: 121
-DAO rsa: 163
-DAOACK rsa: 108
-DIO rsa: 121
-DIO rsa: 121
-DAO rsa: 163
-DAOACK rsa: 108
-DIO rsa: 121
-DIO rsa: 121
-DAO rsa: 163
-DAOACK rsa: 108
-DIO rsa: 121
-DIO rsa: 121
-DAO rsa: 163
-DAOACK rsa: 108
-DIO rsa: 121
-DIO rsa: 121
-DAO rsa: 163
-DAOACK rsa: 108
-DIO rsa: 121
-DIO rsa: 121
-DAO rsa: 163
-DAOACK rsa: 108
-DIO rsa: 121
-DIO rsa: 121
-DAO rsa: 163
-DAOACK rsa: 108
-DIO rsa: 121
-DIO rsa: 121
-DAO rsa: 163
-DAOACK rsa: 108
-DIO rsa: 121
-DIO rsa: 121
-DAO rsa: 163
-DAOACK rsa: 108
-DIS sem_criptografia: 62
-DIS sem_criptografia: 62
-DIO sem_criptografia: 100
-DAO sem_criptografia: 100
-DAOACK sem_criptografia: 80
-DIO sem_criptografia: 100
-DIO sem_criptografia: 100
-DAO sem_criptografia: 120
-DAOACK sem_criptografia: 80
-DIO sem_criptografia: 100
-DIO sem_criptografia: 100
-DAO sem_criptografia: 140
-DAOACK sem_criptografia: 80
-DIO sem_criptografia: 100
-DIO sem_criptografia: 100
-DAO sem_criptografia: 140
-DAOACK sem_criptografia: 80
-DIO sem_criptografia: 100
-DIO sem_criptografia: 100
-DAO sem_criptografia: 140
-DAOACK sem_criptografia: 80
-DIO sem_criptografia: 100
-DIO sem_criptografia: 100
-DAO sem_criptografia: 140
-DAOACK sem_criptografia: 80
-DIO sem_criptografia: 100
-DIO sem_criptografia: 100
-DAO sem_criptografia: 140
-DAOACK sem_criptografia: 80
-DIO sem_criptografia: 100
-DIO sem_criptografia: 100
-DAO sem_criptografia: 140
-DAOACK sem_criptografia: 80
-DIO sem_criptografia: 100
-DIO sem_criptografia: 100
-DAO sem_criptografia: 140
-DAOACK sem_criptografia: 80
-DIO sem_criptografia: 100
-DIO sem_criptografia: 100
-DAO sem_criptografia: 140
-DAOACK sem_criptografia: 80
-DIO sem_criptografia: 100
-DIO sem_criptografia: 100
-DAO sem_criptografia: 140
-DAOACK sem_criptografia: 80
-DIO sem_criptografia: 100
-DIO sem_criptografia: 100
-DAO sem_criptografia: 140
-DAOACK sem_criptografia: 80
+2. `packet_size_symmetric.py` - This script compares the bandwidth between the RSA and Kyber scenarios, generating a graph in the output folder. Graph example:
 
-```
-
-E na figura a seguir:
-
-![](https://raw.githubusercontent.com/lowpan/post-quantum/refs/heads/main/resultado.png)
+![Packet size symmetric](./output/packet_size_symmetric.png)
