@@ -20,7 +20,7 @@ It will run 10 iterations for each topology and scenario, generating the PCAP fi
 
 To generate the PCAP files manually, the commands may take these arguments:
 
-* `-t` for topology ID (It can be a number between 1 and 12 and is respective to the topologies in the `topologies.py` file)
+* `-t` for topology ID (It can be a number between 1 and 12 and is respective to the topologies in the `topologies.py` file. 1 by default)
 
 * `-i` for the iteration number (It can be a number between 1 and 10. 1 by default)
 

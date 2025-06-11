@@ -139,9 +139,9 @@ ax.spines['bottom'].set_visible(False)
 ax.tick_params(axis='x', length=0)
 
 legend_elements = [
-    Patch(facecolor='white', edgecolor='black', hatch=topo_hatches['1'], label='Topologia 1'),
-    Patch(facecolor='white', edgecolor='black', hatch=topo_hatches['4'], label='Topologia 4'),
-    Patch(facecolor='white', edgecolor='black', hatch=topo_hatches['12'], label='Topologia 12'),
+    Patch(facecolor='white', edgecolor='black', hatch=topo_hatches['1'], label='Topology 1'),
+    Patch(facecolor='white', edgecolor='black', hatch=topo_hatches['4'], label='Topology 4'),
+    Patch(facecolor='white', edgecolor='black', hatch=topo_hatches['12'], label='Topology 12'),
     Patch(facecolor='white', edgecolor='white', label=''),
     Patch(facecolor=pkt_colors['DIO'], label='DIO'),
     Patch(facecolor=pkt_colors['DAO'], label='DAO'),
