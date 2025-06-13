@@ -46,7 +46,7 @@ Execute the `network.py` file as follows:
 `sudo python network.py -s kyber -t <topo_id> -b`
 
 
-## Gerando resultados
+## Generate Results
 
 There are two scripts to generate the results from the PCAP files:
 
